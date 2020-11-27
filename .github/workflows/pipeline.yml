@@ -1,16 +1,14 @@
 name: ServiceNow GitHub Actions Demo
 
 on:
-  pull_request:
   push:
     branches:
-      - master
+      - main
 
 jobs:
   build:
-    name: Publish to Test from Repo
-    runs-on: ubuntu-latest
-    # if: ${{ github.event_name == 'pull_request'}}
+    name: Publish from Dev
+    runs-on: windows-latest
     
     steps:
 
@@ -22,13 +20,22 @@ jobs:
           snowSourceInstance: ${{ secrets.SN_TEST_INSTANCE }}
           appSysID: ${{ secrets.SN_APP_SYSID }}
 
+  test:
+    needs: build
+    name: Run ATF in Test
+    runs-on: windows-latest
+    # if: ${{ github.event_name == 'pull_request'}}
+    
+    steps:
       - name: ServiceNow CI/CD Run ATF Test Suite
         uses: ServiceNow/sncicd-tests-run@1.0.0
         with:
+          browserName: 'Chrome'
+          browserVersion: '8'
+          osName: 'Windows'
+          osVersion: '10'
           testSuiteSysId: ${{ secrets.SN_ATFTESTSUITE_SYSID }}
         env:
           snowUsername: ${{ secrets.SN_USERNAME }}
           snowPassword: ${{ secrets.SN_PASSWORD }}
           snowInstallInstance: ${{ secrets.SN_TEST_INSTANCE }}
-
-     
